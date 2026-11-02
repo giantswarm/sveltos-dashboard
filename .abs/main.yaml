@@ -1,0 +1,5 @@
+replace-chart-version-with-git: true
+generate-metadata: true
+chart-dir: ./helm/sveltos-dashboard
+destination: ./build
+helm-template-extra-values: ./helm/sveltos-dashboard/ci/ci-values.yaml
