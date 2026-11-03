@@ -1,0 +1,6 @@
+checks:
+  exclude:
+  # upstream sets no readOnlyRootFilesystem for dashboard and ui-backend; we keep upstream values
+  - no-read-only-root-fs
+  # upstream dashboard has no securityContext and its image is not checked to run as non-root
+  - run-as-non-root
