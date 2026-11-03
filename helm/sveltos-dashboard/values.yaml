@@ -1,12 +1,139 @@
-# This file is a Helm values file for the sveltos-dashboard chart.
-#
-# To learn more about how to configure your app on your cluster
-# and override the default values in here, visit:
-#
-#   https://docs.giantswarm.io/tutorials/fleet-management/app-platform/app-configuration/#basic-values-merging-example
-#
-image:
-  name: "giantswarm/sveltos-dashboard"
-  tag: ""
-registry:
-  domain: gsoci.azurecr.io
+global:
+  registry: gsoci.azurecr.io/giantswarm
+  useDigest: false
+  imagePullSecrets: []
+dashboard:
+  annotations: {}
+  dashboard:
+    image:
+      repository: projectsveltos/dashboard
+      tag: v1.16.1
+      digest: sha256:5b068eeee64eee7195a5198f4849a04fa9a962a50d8597a19caa9fe9befbea9f
+    resources:
+      limits:
+        cpu: 500m
+        memory: 512Mi
+      requests:
+        cpu: 100m
+        memory: 128Mi
+  ports:
+    - port: 80
+      protocol: TCP
+      targetPort: 5173
+  replicas: 1
+  type: ClusterIP
+  ingress:
+    enabled: false
+    className: ""
+    annotations: {}
+    hosts:
+      - host: dashboard.cluster.local
+        paths:
+          - path: /
+            pathType: ImplementationSpecific
+    tls: []
+    #  - secretName: chart-example-tls
+    #    hosts:
+    #      - dashboard.cluster.local
+
+  # Gateway API HTTPRoute configuration
+  # NOTE: Gateway API support is in EXPERIMENTAL status
+  # Support depends on your Gateway controller implementation
+  # Some controllers may require additional configuration (e.g., BackendTLSPolicy for HTTPS backends)
+  # Refer to https://gateway-api.sigs.k8s.io/implementations/ for controller-specific details
+  httpRoute:
+    enabled: false
+    labels: {}
+    annotations: {}
+    # parentRefs defines the Gateway(s) that this HTTPRoute is attached to
+    parentRefs: []
+      # - name: gateway
+      # namespace: gateway-system
+      # sectionName: https
+      # port: 443
+    # hostnames defines the hostnames for routing
+    hostnames:
+      - dashboard.cluster.local
+    # rules defines routing rules
+    rules:
+      - matches:
+          - path:
+              type: PathPrefix
+              value: /
+        # filters:
+        #   - type: RequestHeaderModifier
+        #     requestHeaderModifier:
+        #       add:
+        #         - name: X-Custom-Header
+        #           value: custom-value
+  tolerations: []
+  nodeSelector:
+    kubernetes.io/os: linux
+  affinity: {}
+# auth configures authentication for the Sveltos Dashboard.
+# By default, manual token authentication is used.
+# To enable OIDC authentication, uncomment and fill in the oidc section.
+# auth:
+#   oidc:
+#     # Issuer URL of your OIDC provider
+#     issuer: ""
+#     # Client ID registered with your OIDC provider (must be a public client)
+#     clientId: ""
+#     # Full redirect URI after OIDC login (defaults to <origin>/oidc-callback if unset)
+#     redirectUri: ""
+#     # Scopes to request from your OIDC provider (defaults to "openid profile email offline_access" if unset)
+#     scopes: ""
+#     # Which token of the login is sent to the backend as the bearer token: "access_token" (default) or "id_token".
+#     # Use "id_token" when the provider issues access tokens that are encrypted (JWE) or opaque: the Kubernetes API
+#     # server and kube-oidc-proxy can only verify signed JWTs, which the ID token is.
+#     tokenType: ""
+
+kubernetesClusterDomain: cluster.local
+uiBackendManager:
+  manager:
+    args:
+      - --diagnostics-address=:8443
+      - --v=5
+    # -- Additional ui-backend flags, as flag: value (an empty value renders the bare flag). Set oidc-proxy-host (and oidc-proxy-ca-file) to send the dashboard user's token through an OIDC-aware proxy such as kube-oidc-proxy. Every user token goes to the proxy, including a ServiceAccount token from the manual login, which the proxy refuses unless token passthrough is enabled on it.
+    extraArgs: {}
+    #  oidc-proxy-host: https://kube-oidc-proxy.kube-oidc-proxy.svc.cluster.local:443
+    #  oidc-proxy-ca-file: /etc/oidc-proxy-ca/ca.crt
+    # -- Additional environment variables for ui-backend, as a list of Kubernetes EnvVar entries. Do not point KUBERNETES_SERVICE_HOST at an OIDC proxy: ui-backend's own ServiceAccount calls must keep reaching the real API server (use extraArgs oidc-proxy-host for the user tokens instead).
+    extraEnv: []
+    # -- Additional volumes mounted in ui-backend. Each entry takes name, mountPath, optional subPath and readOnly, and a secret or configMap volume source.
+    extraVolumes: []
+    #  - name: oidc-proxy-ca
+    #    mountPath: /etc/oidc-proxy-ca
+    #    readOnly: true
+    #    secret:
+    #      secretName: kube-oidc-proxy-ca
+    containerSecurityContext:
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+          - ALL
+    image:
+      repository: projectsveltos/ui-backend
+      tag: v1.16.1
+      digest: sha256:f6fa338637ebb0df857f325a6f778a35949c27370c85e7836d3af1b58e73766e
+    resources:
+      limits:
+        cpu: 500m
+        memory: 512Mi
+      requests:
+        cpu: 100m
+        memory: 128Mi
+  podSecurityContext:
+    runAsNonRoot: true
+    seccompProfile:
+      type: RuntimeDefault
+  ports:
+    - port: 80
+      protocol: TCP
+      targetPort: 8080
+  replicas: 1
+  type: ClusterIP
+  tolerations: []
+  nodeSelector:
+    kubernetes.io/os: linux
+  affinity: {}

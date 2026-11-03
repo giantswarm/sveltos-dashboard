@@ -1,38 +1,96 @@
-{{/* vim: set filetype=mustache: */}}
 {{/*
 Expand the name of the chart.
 */}}
-{{- define "name" -}}
-{{- .Chart.Name | trunc 63 | trimSuffix "-" -}}
-{{- end -}}
+{{- define "projectsveltos.name" -}}
+{{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
+{{- end }}
 
 {{/*
-Create chart name and version as used by the chart label. A label value is at
-most 63 characters and begins and ends alphanumeric: the cut of a long version
-(a branch build's <version>-dev.<branch>.<date>.<time>.<sha>, or the
-<version>+<digest> helm-controller installs) can land on any run of ".", "_"
-(from "+") and "-", so the whole run is trimmed.
+Create a default fully qualified app name.
+We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
+If release name contains chart name it will be used as a full name.
 */}}
-{{- define "chart" -}}
-{{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimAll "-._" -}}
-{{- end -}}
+{{- define "projectsveltos.fullname" -}}
+{{- if .Values.fullnameOverride }}
+{{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" }}
+{{- else }}
+{{- $name := default .Chart.Name .Values.nameOverride }}
+{{- if contains $name .Release.Name }}
+{{- .Release.Name | trunc 63 | trimSuffix "-" }}
+{{- else }}
+{{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" }}
+{{- end }}
+{{- end }}
+{{- end }}
+
+{{/*
+Create chart name and version as used by the chart label.
+*/}}
+{{- define "projectsveltos.chart" -}}
+{{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
+{{- end }}
 
 {{/*
 Common labels
 */}}
-{{- define "labels.common" -}}
-app: {{ include "name" . | quote }}
-{{ include "labels.selector" . }}
-app.kubernetes.io/managed-by: {{ .Release.Service | quote }}
+{{- define "projectsveltos.labels" -}}
+helm.sh/chart: {{ include "projectsveltos.chart" . }}
+{{ include "projectsveltos.selectorLabels" . }}
+{{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+{{- end }}
+app.kubernetes.io/managed-by: {{ .Release.Service }}
 application.giantswarm.io/team: {{ index .Chart.Annotations "io.giantswarm.application.team" | quote }}
-helm.sh/chart: {{ include "chart" . | quote }}
-{{- end -}}
+{{- end }}
 
 {{/*
 Selector labels
 */}}
-{{- define "labels.selector" -}}
-app.kubernetes.io/name: {{ include "name" . | quote }}
-app.kubernetes.io/instance: {{ .Release.Name | quote }}
-{{- end -}}
+{{- define "projectsveltos.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "projectsveltos.name" . }}
+app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end }}
+
+{{/*
+Create the name of the service account to use
+*/}}
+{{- define "projectsveltos.serviceAccountName" -}}
+{{- if .Values.serviceAccount.create }}
+{{- default (include "projectsveltos.fullname" .) .Values.serviceAccount.name }}
+{{- else }}
+{{- default "default" .Values.serviceAccount.name }}
+{{- end }}
+{{- end }}
+
+{{/*
+Render extra volume mounts from a list of extraVolumes entries.
+*/}}
+{{- define "projectsveltos.extraVolumeMounts" -}}
+{{- range . }}
+- name: {{ .name }}
+  mountPath: {{ .mountPath }}
+  {{- with .subPath }}
+  subPath: {{ . }}
+  {{- end }}
+  {{- with .readOnly }}
+  readOnly: {{ . }}
+  {{- end }}
+{{- end }}
+{{- end }}
+
+{{/*
+Render extra volumes from a list of extraVolumes entries.
+*/}}
+{{- define "projectsveltos.extraVolumes" -}}
+{{- range . }}
+- name: {{ .name }}
+  {{- with .configMap }}
+  configMap:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with .secret }}
+  secret:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+{{- end }}
+{{- end }}
