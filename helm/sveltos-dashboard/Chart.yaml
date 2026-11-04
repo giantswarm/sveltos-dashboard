@@ -1,7 +1,6 @@
 apiVersion: v2
 name: sveltos-dashboard
 description: A Helm chart for Sveltos dashboard
-
 # A chart can be either an 'application' or a 'library' chart.
 #
 # Application charts are a collection of templates that can be packaged into versioned archives
@@ -22,3 +21,6 @@ version: 1.17.0
 appVersion: "1.17.0"
 kubeVersion: ">=1.28.0-0"
 icon: https://github.com/projectsveltos/sveltos/raw/main/docs/assets/logo.png
+upstreamChartVersion: 1.17.0
+annotations:
+  io.giantswarm.application.upstream-chart-version: 1.17.0
