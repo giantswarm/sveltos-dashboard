@@ -114,7 +114,7 @@ uiBackendManager:
           - ALL
     image:
       repository: projectsveltos/ui-backend
-      tag: v1.16.1
+      tag: v1.17.0
       digest: sha256:f6fa338637ebb0df857f325a6f778a35949c27370c85e7836d3af1b58e73766e
     resources:
       limits:
