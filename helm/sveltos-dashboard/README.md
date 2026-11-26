@@ -1,6 +1,6 @@
 # sveltos-dashboard
 
-![Version: 1.16.1](https://img.shields.io/badge/Version-1.16.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.16.1](https://img.shields.io/badge/AppVersion-1.16.1-informational?style=flat-square)
+![Version: 1.18.0](https://img.shields.io/badge/Version-1.18.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.18.0](https://img.shields.io/badge/AppVersion-1.18.0-informational?style=flat-square)
 
 A Helm chart for Sveltos dashboard
 
@@ -16,9 +16,14 @@ Kubernetes: `>=1.28.0-0`
 | global.useDigest | bool | `false` |  |
 | global.imagePullSecrets | list | `[]` |  |
 | dashboard.annotations | object | `{}` |  |
+| dashboard.automountServiceAccountToken | bool | `false` |  |
+| dashboard.podSecurityContext | object | `{}` | Pod securityContext. The image runs nginx as root unless set; 100/101 is its nginx user. |
+| dashboard.extraInitContainers | list | `[]` | Init containers, as a list of Kubernetes Container entries. |
+| dashboard.dashboard.containerSecurityContext | object | `{}` |  |
+| dashboard.dashboard.extraVolumes | list | `[]` | Extra volumes mounted in the dashboard, each with name, mountPath, optional subPath and readOnly, and an emptyDir, secret or configMap source. Read-only rootfs needs writable /app/dist, /etc/nginx/conf.d, /run/nginx, /var/lib/nginx/tmp and /var/log/nginx. |
 | dashboard.dashboard.image.repository | string | `"projectsveltos/dashboard"` |  |
-| dashboard.dashboard.image.tag | string | `"v1.16.1"` |  |
-| dashboard.dashboard.image.digest | string | `"sha256:c231fab2d0e109c2405a02b2bedc03c72b3b935ffabd8958bdb82984ac350815"` |  |
+| dashboard.dashboard.image.tag | string | `"v1.18.0"` |  |
+| dashboard.dashboard.image.digest | string | `"sha256:c8bd684e78f0c26469928d614156561a2539be308f909e7ebd0fc2f4a4a3a7b3"` |  |
 | dashboard.dashboard.resources.limits.cpu | string | `"500m"` |  |
 | dashboard.dashboard.resources.limits.memory | string | `"512Mi"` |  |
 | dashboard.dashboard.resources.requests.cpu | string | `"100m"` |  |
@@ -54,8 +59,8 @@ Kubernetes: `>=1.28.0-0`
 | uiBackendManager.manager.containerSecurityContext.allowPrivilegeEscalation | bool | `false` |  |
 | uiBackendManager.manager.containerSecurityContext.capabilities.drop[0] | string | `"ALL"` |  |
 | uiBackendManager.manager.image.repository | string | `"projectsveltos/ui-backend"` |  |
-| uiBackendManager.manager.image.tag | string | `"v1.16.1"` |  |
-| uiBackendManager.manager.image.digest | string | `"sha256:aed29fcf5937ca4e9de35766684d23eddb128943d81e18096444e464bdfc3da1"` |  |
+| uiBackendManager.manager.image.tag | string | `"v1.18.0"` |  |
+| uiBackendManager.manager.image.digest | string | `"sha256:5f286fbf76f8bf2e7c45e6091dc052bfbb4697abd93be4d8514508752b89aa0a"` |  |
 | uiBackendManager.manager.resources.limits.cpu | string | `"500m"` |  |
 | uiBackendManager.manager.resources.limits.memory | string | `"512Mi"` |  |
 | uiBackendManager.manager.resources.requests.cpu | string | `"100m"` |  |

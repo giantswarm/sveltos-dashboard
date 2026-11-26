@@ -40,7 +40,6 @@ helm.sh/chart: {{ include "projectsveltos.chart" . }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
-application.giantswarm.io/team: {{ index .Chart.Annotations "io.giantswarm.application.team" | quote }}
 {{- end }}
 
 {{/*
@@ -91,6 +90,9 @@ Render extra volumes from a list of extraVolumes entries.
   {{- with .secret }}
   secret:
     {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- if hasKey . "emptyDir" }}
+  emptyDir: {{- toYaml (.emptyDir | default dict) | nindent 4 }}
   {{- end }}
 {{- end }}
 {{- end }}
