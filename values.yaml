@@ -1,14 +1,22 @@
 global:
-  registry: gsoci.azurecr.io/giantswarm
+  registry: docker.io
   useDigest: false
   imagePullSecrets: []
 dashboard:
   annotations: {}
+  automountServiceAccountToken: false
+  # -- Pod securityContext. The image runs nginx as root unless set; 100/101 is its nginx user.
+  podSecurityContext: {}
+  # -- Init containers, as a list of Kubernetes Container entries.
+  extraInitContainers: []
   dashboard:
+    containerSecurityContext: {}
+    # -- Extra volumes mounted in the dashboard, each with name, mountPath, optional subPath and readOnly, and an emptyDir, secret or configMap source. Read-only rootfs needs writable /app/dist, /etc/nginx/conf.d, /run/nginx, /var/lib/nginx/tmp and /var/log/nginx.
+    extraVolumes: []
     image:
       repository: projectsveltos/dashboard
-      tag: v1.16.1
-      digest: sha256:5b068eeee64eee7195a5198f4849a04fa9a962a50d8597a19caa9fe9befbea9f
+      tag: v1.18.0
+      digest: sha256:c8bd684e78f0c26469928d614156561a2539be308f909e7ebd0fc2f4a4a3a7b3
     resources:
       limits:
         cpu: 500m
@@ -114,8 +122,8 @@ uiBackendManager:
           - ALL
     image:
       repository: projectsveltos/ui-backend
-      tag: v1.16.1
-      digest: sha256:f6fa338637ebb0df857f325a6f778a35949c27370c85e7836d3af1b58e73766e
+      tag: v1.18.0
+      digest: sha256:5f286fbf76f8bf2e7c45e6091dc052bfbb4697abd93be4d8514508752b89aa0a
     resources:
       limits:
         cpu: 500m
